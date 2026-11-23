@@ -29,7 +29,7 @@
 | Modelo de datos, vistas y consultas | ✅ Creado |
 | CRUD de categorías y productos | ✅ Funcionando |
 | Consulta de inventario por sucursal | ✅ Solo lectura |
-| Autenticación y permisos por rol | 🚧 Pendiente |
+| Autenticación y permisos por rol | ✅ Inicio de sesión y administración de usuarios |
 | Compras y ventas | 🚧 Pendiente |
 | Movimientos de kardex y alertas | 🚧 Pendiente |
 
@@ -41,7 +41,7 @@
 
 ## Inicio rápido
 
-Instala las dependencias, configura la base de datos con la [guía de inicio rápido](GUIA_INICIO_RAPIDO.md) e inicia **MySQL** en XAMPP. Luego ejecuta:
+Instala las dependencias, inicia **MySQL** en XAMPP y configura la contraseña de la cuenta administradora siguiendo la [guía de inicio rápido](GUIA_INICIO_RAPIDO.md). Luego ejecuta:
 
 ```powershell
 .\.venv\Scripts\python.exe main.py
@@ -54,8 +54,8 @@ La aplicación queda en **http://127.0.0.1:5000**. Los pasos completos están en
 | Pieza | Responsabilidad |
 | --- | --- |
 | `main.py` | Punto de entrada, como en `19102026`. |
-| `app.py` | Rutas web de Flask, formularios, protección CSRF y respuestas. |
-| `Aplicaciones/` | Casos de uso y reglas de categorías, productos e inventario. |
+| `app.py` | Rutas web de Flask, autenticación, autorización y protección CSRF. |
+| `Aplicaciones/` | Casos de uso y reglas de usuarios, categorías, productos e inventario. |
 | `Entidades/` | Clases de categoría, producto y existencia. |
 | `Repositorios/` | Consultas SQL, escritura y transacciones con PyMySQL. |
 | `Utilidades/` | Configuración de Flask y MySQL desde `.env`. |

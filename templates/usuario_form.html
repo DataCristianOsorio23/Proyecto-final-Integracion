@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }} · Inventario{% endblock %}
+{% block contenido %}
+  <h2>{{ titulo }}</h2>
+  <form method="post" class="formulario">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="dos-columnas">
+      <div>
+        <label for="nombre">Nombre</label>
+        <input id="nombre" name="nombre" value="{{ usuario.get('nombre', '') }}" required maxlength="100">
+      </div>
+      <div>
+        <label for="apellido">Apellido</label>
+        <input id="apellido" name="apellido" value="{{ usuario.get('apellido', '') }}" required maxlength="100">
+      </div>
+    </div>
+    <label for="correo">Correo</label>
+    <input id="correo" name="correo" type="email" value="{{ usuario.get('correo', '') }}" required maxlength="150">
+    {% if propia %}
+      <p>Rol de tu cuenta: Administrador</p>
+    {% else %}
+      <label for="rol">Rol</label>
+      <select id="rol" name="rol" required>
+        <option value="">Selecciona un rol</option>
+        {% for rol in roles %}
+          <option value="{{ rol }}" {% if usuario.get('rol') == rol %}selected{% endif %}>{{ rol }}</option>
+        {% endfor %}
+      </select>
+      {% if editando %}
+        <label for="estado">Estado</label>
+        <select id="estado" name="estado">
+          <option value="1" {% if usuario.get('estado')|int == 1 %}selected{% endif %}>Activo</option>
+          <option value="0" {% if usuario.get('estado')|int == 0 %}selected{% endif %}>Inactivo</option>
+        </select>
+      {% endif %}
+    {% endif %}
+    <label for="password">{{ 'Nueva contraseña (opcional)' if editando else 'Contraseña' }}</label>
+    <input id="password" name="password" type="password" {% if not editando %}required{% endif %}
+           minlength="6" maxlength="128" autocomplete="new-password">
+    <p class="ayuda">Usa entre 6 y 128 caracteres.</p>
+    <div class="botones">
+      <button class="boton" type="submit">Guardar</button>
+      <a href="{{ url_for('listar_usuarios') }}">Cancelar</a>
+    </div>
+  </form>
+{% endblock %}

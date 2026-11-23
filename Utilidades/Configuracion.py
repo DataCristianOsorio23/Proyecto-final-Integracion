@@ -1,5 +1,6 @@
 import os
 import secrets
+from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -16,6 +17,13 @@ def cargar_entorno():
 def configurar_flask(app):
     cargar_entorno()
     app.secret_key = os.getenv("FLASK_SECRET_KEY") or secrets.token_hex(32)
+    app.config.update(
+        SESSION_COOKIE_NAME="inventario_sesion",
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE="Lax",
+        SESSION_COOKIE_SECURE=os.getenv("FLASK_COOKIE_SECURE") == "1",
+        PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
+    )
 
 
 def configuracion_mysql():

@@ -9,11 +9,23 @@
 <body>
   <header>
     <h1>Inventario del supermercado</h1>
+    {% if g.usuario %}
     <nav aria-label="Navegación principal">
       <a href="{{ url_for('listar_productos') }}">Productos</a>
       <a href="{{ url_for('listar_categorias') }}">Categorías</a>
       <a href="{{ url_for('ver_inventario') }}">Inventario</a>
+      {% if 'usuarios' in g.permisos %}
+        <a href="{{ url_for('listar_usuarios') }}">Usuarios</a>
+      {% endif %}
     </nav>
+    <div class="sesion">
+      <span>{{ g.usuario.nombre }} {{ g.usuario.apellido }} · {{ g.usuario.rol }}</span>
+      <form action="{{ url_for('cerrar_sesion') }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit">Cerrar sesión</button>
+      </form>
+    </div>
+    {% endif %}
   </header>
   <main>
     {% with mensajes = get_flashed_messages(with_categories=true) %}

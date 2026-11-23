@@ -42,13 +42,25 @@ Las rutinas de escritura se ejecutan dentro de la transacción del llamador. La 
 CALL sp_consultar_kardex(NULL, NULL, NULL, NULL);
 ```
 
-## 3. Inicia la aplicación
+## 3. Configura el acceso e inicia la aplicación
+
+Con MySQL iniciado, asigna una contraseña nueva a la cuenta administradora inicial. Usa tu correo de administrador si tu base ya tiene una cuenta distinta.
 
 ```powershell
+.\.venv\Scripts\python.exe -m flask --app app establecer-password admin@supermercado.com
 .\.venv\Scripts\python.exe main.py
 ```
 
-Abre [la aplicación](http://127.0.0.1:5000/). La raíz redirige a Productos. Desde el menú también puedes abrir Categorías e Inventario por sucursal.
+El primer comando solicita y confirma la contraseña sin mostrarla en la consola. La contraseña debe tener entre 6 y 128 caracteres. Las cuentas iniciales y las contraseñas en texto plano de bases anteriores requieren este paso para habilitar su acceso. El comando actualiza la cuenta existente y conserva sus referencias.
+
+Abre [la aplicación](http://127.0.0.1:5000/) e inicia sesión. En **Usuarios**, el administrador puede crear cuentas, asignar roles, cambiar contraseñas y activar o desactivar cuentas. También puede habilitar las cuentas de ejemplo existentes estableciendo sus contraseñas desde esa pantalla.
+
+| Permiso | Administrador | Supervisor | Bodeguero | Vendedor |
+| --- | :---: | :---: | :---: | :---: |
+| Consultar productos, categorías e inventario | Sí | Sí | Sí | |
+| Crear, editar y cambiar el estado de productos | Sí | Sí | Sí | |
+| Crear, editar y cambiar el estado de categorías | Sí | Sí | | |
+| Administrar usuarios y asignar roles | Sí | | | |
 
 ## 4. Prueba el flujo
 
@@ -56,6 +68,7 @@ Abre [la aplicación](http://127.0.0.1:5000/). La raíz redirige a Productos. De
 2. Abre Inventario y comprueba que el producto tenga saldo cero en cada sucursal activa.
 3. Edita el producto. Los límites del catálogo se guardan como valores predeterminados y se respetan los límites ya asignados a las sucursales.
 4. Desactiva el producto sin existencias y después la categoría si ya no tiene productos activos.
+5. Desde **Usuarios**, crea una cuenta con el rol Vendedor. Cierra sesión, ingresa con esa cuenta y comprueba que puedes consultar el catálogo. Si abres directamente `/productos/nuevo`, recibirás un error 403.
 
 Para consultar el inventario, kardex, ventas detalladas y compras detalladas desde SQL, selecciona la base en phpMyAdmin y ejecuta `BD/consultas_vistas.sql`.
 

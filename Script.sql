@@ -613,27 +613,29 @@ VALUES
 
 /* USUARIOS */
 
+/* Las cuentas iniciales requieren establecer una contraseña mediante Flask CLI. */
+
 INSERT INTO usuarios
 (id_rol, nombre, apellido, correo, password, telefono)
 VALUES
 (1, 'Carlos', 'Administrador',
  'admin@supermercado.com',
- '123456',
+ 'SIN_CONFIGURAR',
  '3001111111'),
 
 (2, 'Laura', 'Gómez',
  'laura@supermercado.com',
- '123456',
+ 'SIN_CONFIGURAR',
  '3002222222'),
 
 (3, 'Andrés', 'Rodríguez',
  'andres@supermercado.com',
- '123456',
+ 'SIN_CONFIGURAR',
  '3003333333'),
 
 (4, 'María', 'Pérez',
  'maria@supermercado.com',
- '123456',
+ 'SIN_CONFIGURAR',
  '3004444444');
 
 
