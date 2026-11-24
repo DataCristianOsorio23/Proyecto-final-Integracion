@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block titulo %}Registrar ajuste · Inventario{% endblock %}
+{% block contenido %}
+  <h2>Registrar ajuste de inventario</h2>
+  <form method="post" class="formulario">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <label for="id_producto">Producto *</label>
+    <select id="id_producto" name="id_producto" required>
+      <option value="">Selecciona un producto</option>
+      {% for producto in productos %}
+        <option value="{{ producto.id_producto }}" {% if ajuste.get('id_producto') == producto.id_producto|string %}selected{% endif %}>
+          {{ producto.nombre }} ({{ producto.codigo_barras }})
+        </option>
+      {% endfor %}
+    </select>
+
+    <div class="dos-columnas">
+      <div>
+        <label for="id_sucursal">Sucursal *</label>
+        <select id="id_sucursal" name="id_sucursal" required>
+          <option value="">Selecciona una sucursal</option>
+          {% for sucursal in sucursales %}
+            <option value="{{ sucursal.id_sucursal }}" {% if ajuste.get('id_sucursal') == sucursal.id_sucursal|string %}selected{% endif %}>{{ sucursal.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="id_tipo_movimiento">Tipo de ajuste *</label>
+        <select id="id_tipo_movimiento" name="id_tipo_movimiento" required>
+          <option value="">Selecciona un tipo</option>
+          {% for tipo in tipos %}
+            <option value="{{ tipo.id_tipo_movimiento }}" {% if ajuste.get('id_tipo_movimiento') == tipo.id_tipo_movimiento|string %}selected{% endif %}>
+              {{ tipo.nombre }} ({{ 'suma' if tipo.tipo == 'ENTRADA' else 'resta' }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="cantidad">Cantidad *</label>
+        <input id="cantidad" name="cantidad" type="number" min="1" step="1" required value="{{ ajuste.get('cantidad', '') }}">
+      </div>
+    </div>
+
+    <label for="observacion">Justificación *</label>
+    <textarea id="observacion" name="observacion" maxlength="300" rows="3" required>{{ ajuste.get('observacion', '') }}</textarea>
+
+    <p class="ayuda">El ajuste queda en el kardex con tu usuario, la fecha y los saldos anterior y nuevo. No se permite dejar el saldo en negativo.</p>
+    <div class="botones">
+      <button class="boton" type="submit">Registrar ajuste</button>
+      <a href="{{ url_for('ver_inventario') }}">Cancelar</a>
+    </div>
+  </form>
+{% endblock %}

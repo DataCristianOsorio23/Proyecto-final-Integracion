@@ -1,8 +1,15 @@
 {% extends "base.html" %}
 {% block titulo %}Inventario · Supermercado{% endblock %}
 {% block contenido %}
-  <h2>Inventario por sucursal</h2>
-  <p>Esta pantalla consulta la vista <code>vw_inventario_general</code>. El saldo no se edita aquí.</p>
+  <div class="encabezado">
+    <div>
+      <h2>Inventario por sucursal</h2>
+      <p>Esta pantalla consulta la vista <code>vw_inventario_general</code>. El saldo cambia solo con compras, ventas y ajustes, que quedan en el kardex.</p>
+    </div>
+    {% if puede('registrar_ajustes') %}
+      <a class="boton" href="{{ url_for('registrar_ajuste') }}">Registrar ajuste</a>
+    {% endif %}
+  </div>
   <div class="tabla-contenedor">
     <table>
       <thead><tr><th>Sucursal</th><th>Producto</th><th>Categoría</th><th>Saldo</th><th>Mínimo</th><th>Máximo</th><th>Situación</th></tr></thead>
@@ -23,4 +30,5 @@
       </tbody>
     </table>
   </div>
+  <p class="ayuda">Stock bajo: saldo menor o igual al mínimo. Agotado: saldo 0. Sobrestock: saldo mayor que el máximo.</p>
 {% endblock %}

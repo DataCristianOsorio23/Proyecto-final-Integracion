@@ -6,24 +6,28 @@
       <h2>Categorías</h2>
       <p>Organizan los productos del supermercado.</p>
     </div>
-    <a class="boton" href="{{ url_for('crear_categoria') }}">Nueva categoría</a>
+    {% if puede('administrar_categorias') %}
+      <a class="boton" href="{{ url_for('crear_categoria') }}">Nueva categoría</a>
+    {% endif %}
   </div>
   <div class="tabla-contenedor">
     <table>
-      <thead><tr><th>Nombre</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <thead><tr><th>Nombre</th><th>Descripción</th><th>Estado</th>{% if puede('administrar_categorias') %}<th>Acciones</th>{% endif %}</tr></thead>
       <tbody>
         {% for categoria in categorias %}
           <tr>
             <td>{{ categoria.nombre }}</td>
             <td>{{ categoria.descripcion or '—' }}</td>
             <td>{{ 'Activa' if categoria.estado else 'Inactiva' }}</td>
-            <td class="acciones">
-              <a href="{{ url_for('editar_categoria', id_categoria=categoria.id_categoria) }}">Editar</a>
-              <form method="post" action="{{ url_for('cambiar_estado_categoria', id_categoria=categoria.id_categoria) }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit">{{ 'Desactivar' if categoria.estado else 'Reactivar' }}</button>
-              </form>
-            </td>
+            {% if puede('administrar_categorias') %}
+              <td class="acciones">
+                <a href="{{ url_for('editar_categoria', id_categoria=categoria.id_categoria) }}">Editar</a>
+                <form method="post" action="{{ url_for('cambiar_estado_categoria', id_categoria=categoria.id_categoria) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit">{{ 'Desactivar' if categoria.estado else 'Reactivar' }}</button>
+                </form>
+              </td>
+            {% endif %}
           </tr>
         {% else %}
           <tr><td colspan="4">No hay categorías registradas.</td></tr>

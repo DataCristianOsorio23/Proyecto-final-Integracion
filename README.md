@@ -29,9 +29,9 @@
 | Modelo de datos, vistas y consultas | ✅ Creado |
 | CRUD de categorías y productos | ✅ Funcionando |
 | Consulta de inventario por sucursal | ✅ Solo lectura |
-| Autenticación y permisos por rol | 🚧 Pendiente |
-| Compras y ventas | 🚧 Pendiente |
-| Movimientos de kardex y alertas | 🚧 Pendiente |
+| Autenticación y permisos por rol | ✅ Funcionando |
+| Compras y ventas | ✅ Funcionando |
+| Movimientos de kardex y alertas | ✅ Funcionando |
 
 ## Capturas
 
@@ -41,26 +41,40 @@
 
 ## Inicio rápido
 
-Instala las dependencias, configura la base de datos con la [guía de inicio rápido](GUIA_INICIO_RAPIDO.md) e inicia **MySQL** en XAMPP. Luego ejecuta:
+Instala las dependencias, configura la base de datos con la [guía de inicio rápido](GUIA_INICIO_RAPIDO.md) e inicia **MySQL** en XAMPP. Luego, en PowerShell, entra a la carpeta del proyecto y ejecuta la aplicación con el Python de su entorno `.venv`:
 
 ```powershell
+cd Proyecto-final-Integracion
 .\.venv\Scripts\python.exe main.py
 ```
 
-La aplicación queda en **http://127.0.0.1:5000**. Los pasos completos están en la [guía de inicio rápido](GUIA_INICIO_RAPIDO.md).
+No ejecutes `python main.py` desde la carpeta superior ni con otro Python: `main.py` está dentro de `Proyecto-final-Integracion` y Flask solo está instalado en su `.venv`.
+
+La aplicación queda en **http://127.0.0.1:5000** y pide iniciar sesión. La contraseña de los usuarios de ejemplo es `123456`:
+
+| Usuario | Rol | Puede |
+| --- | --- | --- |
+| `admin@supermercado.com` | Administrador | Todas las opciones |
+| `maria@supermercado.com` | Supervisor | Todas las opciones |
+| `andres@supermercado.com` | Bodeguero | Productos, compras, ajustes, kardex y alertas |
+| `laura@supermercado.com` | Vendedor | Sus propias ventas; consulta productos e inventario |
+
+Antes del primer inicio de sesión hay que cifrar las contraseñas con `cifrar_contrasenas.py`. Ese paso y los demás están en la [guía de inicio rápido](GUIA_INICIO_RAPIDO.md).
 
 ## Estructura
 
 | Pieza | Responsabilidad |
 | --- | --- |
 | `main.py` | Punto de entrada, como en `19102026`. |
-| `app.py` | Rutas web de Flask, formularios, protección CSRF y respuestas. |
-| `Aplicaciones/` | Casos de uso y reglas de categorías, productos e inventario. |
-| `Entidades/` | Clases de categoría, producto y existencia. |
+| `app.py` | Rutas web de Flask, sesión, permisos por rol, formularios, protección CSRF y respuestas. |
+| `Aplicaciones/` | Casos de uso y reglas de acceso, categorías, productos, inventario, kardex, alertas, compras y ventas. |
+| `Entidades/` | Clases de usuario, categoría, producto, existencia, alerta, compra, venta y línea de detalle. |
 | `Repositorios/` | Consultas SQL, escritura y transacciones con PyMySQL. |
 | `Utilidades/` | Configuración de Flask y MySQL desde `.env`. |
 | `Script.sql` | Instalación de una base de demostración independiente. |
 | `BD/procedimientos_almacenados.sql` | Rutinas de alta de productos, movimientos de inventario y consulta de kardex. |
+| `BD/actualizacion_modulos.sql` | Regla de stock bajo, cliente «Consumidor final», inventario faltante y rutina de alertas. |
+| `cifrar_contrasenas.py` | Convierte a hash las contraseñas de usuarios guardadas en texto plano. |
 | `templates/`, `static/` y `assets/` | Interfaz web, estilos y recursos. |
 | `BD/` y `docs/` | Modelo original, consultas, diagramas y documentación. |
 

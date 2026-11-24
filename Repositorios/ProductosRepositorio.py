@@ -1,3 +1,8 @@
+"""Consultas SQL de la tabla productos.
+
+Las funciones que reciben cursor trabajan dentro de la transacción del llamador y no confirman.
+"""
+
 from Entidades.Producto import Producto
 from Repositorios.BaseDatos import consultar, consultar_uno
 
@@ -10,6 +15,7 @@ _CAMPOS = (
 
 
 def listar():
+    """Devuelve todos los productos como lista de Producto, con el nombre de su categoría."""
     filas = consultar(
         f"SELECT {_CAMPOS}, c.nombre AS categoria FROM productos p "
         "JOIN categorias c ON c.id_categoria = p.id_categoria ORDER BY p.nombre"
@@ -18,6 +24,7 @@ def listar():
 
 
 def obtener(id_producto):
+    """Devuelve el Producto con ese id, o None si no existe."""
     fila = consultar_uno(
         f"SELECT {_CAMPOS} FROM productos p WHERE p.id_producto = %s",
         (id_producto,),
@@ -26,6 +33,7 @@ def obtener(id_producto):
 
 
 def obtener_bloqueado(cursor, id_producto):
+    """Bloquea la fila (FOR UPDATE) y devuelve el Producto, o None si no existe."""
     cursor.execute(
         f"SELECT {_CAMPOS} FROM productos p WHERE p.id_producto = %s FOR UPDATE",
         (id_producto,),
@@ -35,6 +43,7 @@ def obtener_bloqueado(cursor, id_producto):
 
 
 def tiene_activos(cursor, id_categoria):
+    """Devuelve True si la categoría tiene al menos un producto activo."""
     cursor.execute(
         "SELECT 1 FROM productos WHERE id_categoria = %s AND estado = 1 LIMIT 1",
         (id_categoria,),
@@ -43,6 +52,7 @@ def tiene_activos(cursor, id_categoria):
 
 
 def _valores(producto):
+    """Devuelve los campos del Producto en el orden que esperan sp_crear_producto y el UPDATE."""
     return (
         producto.id_categoria, producto.codigo_barras, producto.nombre,
         producto.descripcion, producto.marca, producto.unidad_medida,
@@ -52,6 +62,8 @@ def _valores(producto):
 
 
 def insertar(cursor, producto):
+    """Crea el producto con sp_crear_producto (también su inventario en cero por sucursal activa).
+    Devuelve el id del producto nuevo."""
     cursor.execute(
         "CALL sp_crear_producto(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
         _valores(producto),
@@ -60,6 +72,7 @@ def insertar(cursor, producto):
 
 
 def actualizar(cursor, id_producto, producto):
+    """Reemplaza los datos del catálogo del producto. No cambia los límites de cada sucursal."""
     cursor.execute(
         "UPDATE productos SET id_categoria = %s, codigo_barras = %s, nombre = %s, "
         "descripcion = %s, marca = %s, unidad_medida = %s, precio_compra = %s, "
@@ -69,6 +82,7 @@ def actualizar(cursor, id_producto, producto):
 
 
 def fijar_estado(cursor, id_producto, estado):
+    """Cambia el estado del producto a 1 (activo) o 0 (inactivo)."""
     cursor.execute(
         "UPDATE productos SET estado = %s WHERE id_producto = %s",
         (estado, id_producto),

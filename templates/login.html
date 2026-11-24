@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}Iniciar sesión · Inventario{% endblock %}
+{% block contenido %}
+  <h2>Iniciar sesión</h2>
+  <form method="post" class="formulario angosto">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <label for="correo">Correo</label>
+    <input id="correo" name="correo" type="email" maxlength="150" required autocomplete="username" value="{{ correo }}">
+
+    <label for="contrasena">Contraseña</label>
+    <input id="contrasena" name="contrasena" type="password" required autocomplete="current-password">
+
+    <div class="botones">
+      <button class="boton" type="submit">Entrar</button>
+    </div>
+  </form>
+{% endblock %}

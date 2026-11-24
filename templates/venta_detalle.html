@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block titulo %}Venta {{ venta.numero_factura }} · Inventario{% endblock %}
+{% block contenido %}
+  <div class="encabezado">
+    <div>
+      <h2>Venta {{ venta.numero_factura }}</h2>
+      <p><span class="estado {{ venta.estado|lower }}">{{ venta.estado|capitalize }}</span></p>
+    </div>
+    {% if venta.estado == 'PENDIENTE' %}
+      <div class="acciones">
+        <form method="post" action="{{ url_for('cobrar_venta', id_venta=venta.id_venta) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="boton" type="submit">Cobrar venta</button>
+        </form>
+        <form method="post" action="{{ url_for('anular_venta', id_venta=venta.id_venta) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit">Anular</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="datos">
+    <div><span>Cliente</span>{{ venta.cliente }}</div>
+    <div><span>Sucursal</span>{{ venta.sucursal }}</div>
+    <div><span>Método de pago</span>{{ venta.metodo_pago }}</div>
+    <div><span>Fecha</span>{{ venta.fecha_venta.strftime('%Y-%m-%d %H:%M') }}</div>
+    <div><span>Vendedor</span>{{ venta.usuario }}</div>
+  </div>
+
+  <div class="tabla-contenedor">
+    <table>
+      <thead><tr><th>Producto</th><th class="numero">Cantidad</th><th class="numero">Precio unitario</th><th class="numero">Descuento</th><th class="numero">Subtotal</th></tr></thead>
+      <tbody>
+        {% for linea in lineas %}
+          <tr>
+            <td>{{ linea.producto }}</td>
+            <td class="numero">{{ linea.cantidad }}</td>
+            <td class="numero">${{ '%.2f'|format(linea.precio_unitario) }}</td>
+            <td class="numero">${{ '%.2f'|format(linea.descuento) }}</td>
+            <td class="numero">${{ '%.2f'|format(linea.subtotal) }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <dl class="resumen">
+    <dt>Subtotal</dt><dd>${{ '%.2f'|format(venta.subtotal) }}</dd>
+    <dt>Descuentos (informativo)</dt><dd>${{ '%.2f'|format(venta.descuento) }}</dd>
+    <dt>Impuesto</dt><dd>${{ '%.2f'|format(venta.impuesto) }}</dd>
+    <dt>Total</dt><dd>${{ '%.2f'|format(venta.total) }}</dd>
+  </dl>
+
+  <p class="ayuda">El subtotal ya tiene restados los descuentos. Al cobrar, cada línea genera una salida en el kardex; si alguna línea no tiene stock suficiente, la venta no se cobra y sigue pendiente.</p>
+  <p><a href="{{ url_for('listar_ventas') }}">Volver a ventas</a></p>
+{% endblock %}

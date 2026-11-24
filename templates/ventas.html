@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}Ventas · Inventario{% endblock %}
+{% block contenido %}
+  <div class="encabezado">
+    <div>
+      <h2>Ventas</h2>
+      <p>Una venta pendiente no descuenta stock hasta que se cobra.{% if g.usuario.rol == 'Vendedor' %} Solo ves tus ventas.{% endif %}</p>
+    </div>
+    <a class="boton" href="{{ url_for('crear_venta') }}">Nueva venta</a>
+  </div>
+  <div class="tabla-contenedor">
+    <table>
+      <thead><tr><th>Factura</th><th>Fecha</th><th>Cliente</th><th>Sucursal</th><th>Vendedor</th><th class="numero">Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody>
+        {% for venta in ventas %}
+          <tr>
+            <td>{{ venta.numero_factura }}</td>
+            <td>{{ venta.fecha_venta.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ venta.cliente }}</td>
+            <td>{{ venta.sucursal }}</td>
+            <td>{{ venta.usuario }}</td>
+            <td class="numero">${{ '%.2f'|format(venta.total) }}</td>
+            <td><span class="estado {{ venta.estado|lower }}">{{ venta.estado|capitalize }}</span></td>
+            <td><a href="{{ url_for('ver_venta', id_venta=venta.id_venta) }}">Ver</a></td>
+          </tr>
+        {% else %}
+          <tr><td colspan="8">No hay ventas registradas.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block titulo %}Compra {{ compra.numero_factura }} · Inventario{% endblock %}
+{% block contenido %}
+  <div class="encabezado">
+    <div>
+      <h2>Compra {{ compra.numero_factura }}</h2>
+      <p><span class="estado {{ compra.estado|lower }}">{{ compra.estado|capitalize }}</span></p>
+    </div>
+    {% if compra.estado == 'REGISTRADA' %}
+      <div class="acciones">
+        <form method="post" action="{{ url_for('recibir_compra', id_compra=compra.id_compra) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="boton" type="submit">Recibir compra</button>
+        </form>
+        <form method="post" action="{{ url_for('anular_compra', id_compra=compra.id_compra) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit">Anular</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="datos">
+    <div><span>Proveedor</span>{{ compra.proveedor }}</div>
+    <div><span>Sucursal</span>{{ compra.sucursal }}</div>
+    <div><span>Fecha</span>{{ compra.fecha_compra.strftime('%Y-%m-%d %H:%M') }}</div>
+    <div><span>Registrada por</span>{{ compra.usuario }}</div>
+  </div>
+
+  <div class="tabla-contenedor">
+    <table>
+      <thead><tr><th>Producto</th><th class="numero">Cantidad</th><th class="numero">Precio unitario</th><th class="numero">Descuento</th><th class="numero">Subtotal</th></tr></thead>
+      <tbody>
+        {% for linea in lineas %}
+          <tr>
+            <td>{{ linea.producto }}</td>
+            <td class="numero">{{ linea.cantidad }}</td>
+            <td class="numero">${{ '%.2f'|format(linea.precio_unitario) }}</td>
+            <td class="numero">${{ '%.2f'|format(linea.descuento) }}</td>
+            <td class="numero">${{ '%.2f'|format(linea.subtotal) }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <dl class="resumen">
+    <dt>Subtotal</dt><dd>${{ '%.2f'|format(compra.subtotal) }}</dd>
+    <dt>Impuesto</dt><dd>${{ '%.2f'|format(compra.impuesto) }}</dd>
+    <dt>Total</dt><dd>${{ '%.2f'|format(compra.total) }}</dd>
+  </dl>
+
+  <p class="ayuda">Al recibir la compra, cada línea genera una entrada en el kardex. Una compra recibida no se puede anular ni recibir otra vez.</p>
+  <p><a href="{{ url_for('listar_compras') }}">Volver a compras</a></p>
+{% endblock %}

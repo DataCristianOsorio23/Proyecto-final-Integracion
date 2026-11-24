@@ -6,11 +6,13 @@
       <h2>Productos</h2>
       <p>Catálogo de artículos del supermercado.</p>
     </div>
-    <a class="boton" href="{{ url_for('crear_producto') }}">Nuevo producto</a>
+    {% if puede('administrar_productos') %}
+      <a class="boton" href="{{ url_for('crear_producto') }}">Nuevo producto</a>
+    {% endif %}
   </div>
   <div class="tabla-contenedor">
     <table>
-      <thead><tr><th>Código</th><th>Nombre</th><th>Categoría</th><th>Precio de venta</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <thead><tr><th>Código</th><th>Nombre</th><th>Categoría</th><th>Precio de venta</th><th>Estado</th>{% if puede('administrar_productos') %}<th>Acciones</th>{% endif %}</tr></thead>
       <tbody>
         {% for producto in productos %}
           <tr>
@@ -19,13 +21,15 @@
             <td>{{ producto.categoria }}</td>
             <td>${{ '%.2f'|format(producto.precio_venta) }}</td>
             <td>{{ 'Activo' if producto.estado else 'Inactivo' }}</td>
-            <td class="acciones">
-              <a href="{{ url_for('editar_producto', id_producto=producto.id_producto) }}">Editar</a>
-              <form method="post" action="{{ url_for('cambiar_estado_producto', id_producto=producto.id_producto) }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit">{{ 'Desactivar' if producto.estado else 'Reactivar' }}</button>
-              </form>
-            </td>
+            {% if puede('administrar_productos') %}
+              <td class="acciones">
+                <a href="{{ url_for('editar_producto', id_producto=producto.id_producto) }}">Editar</a>
+                <form method="post" action="{{ url_for('cambiar_estado_producto', id_producto=producto.id_producto) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit">{{ 'Desactivar' if producto.estado else 'Reactivar' }}</button>
+                </form>
+              </td>
+            {% endif %}
           </tr>
         {% else %}
           <tr><td colspan="6">No hay productos registrados.</td></tr>

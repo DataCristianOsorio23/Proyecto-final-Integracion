@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titulo %}Alertas · Inventario{% endblock %}
+{% block contenido %}
+  <h2>Alertas de inventario</h2>
+  <p>Se crean o se cierran solas cada vez que cambia el saldo de un producto en una sucursal.</p>
+
+  <nav class="pestanas" aria-label="Filtrar alertas">
+    {% for valor, texto in [('PENDIENTE', 'Pendientes'), ('ATENDIDA', 'Atendidas'), ('TODAS', 'Todas')] %}
+      <a href="{{ url_for('listar_alertas', estado=valor) }}" {% if filtro == valor %}aria-current="page"{% endif %}>{{ texto }}</a>
+    {% endfor %}
+  </nav>
+
+  <div class="tabla-contenedor">
+    <table>
+      <thead>
+        <tr><th>Fecha</th><th>Producto</th><th>Sucursal</th><th>Tipo</th><th class="numero">Saldo actual</th><th>Mensaje</th><th>Estado</th><th>Acción</th></tr>
+      </thead>
+      <tbody>
+        {% for alerta in alertas %}
+          <tr>
+            <td>{{ alerta.fecha_alerta.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ alerta.producto }}</td>
+            <td>{{ alerta.sucursal }}</td>
+            <td>{{ alerta.tipo_alerta.replace('_', ' ')|capitalize }}</td>
+            <td class="numero">
+              {% if alerta.stock_actual is not none %}{{ alerta.stock_actual }} <small>(mín. {{ alerta.stock_minimo }}, máx. {{ alerta.stock_maximo }})</small>{% else %}—{% endif %}
+            </td>
+            <td>{{ alerta.mensaje }}</td>
+            <td><span class="estado {{ alerta.estado|lower }}">{{ alerta.estado|capitalize }}</span></td>
+            <td>
+              {% if alerta.estado == 'PENDIENTE' %}
+                <form method="post" action="{{ url_for('atender_alerta', id_alerta=alerta.id_alerta) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit">Marcar atendida</button>
+                </form>
+              {% else %}—{% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="8">No hay alertas en esta lista.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="ayuda">Si marcas una alerta como atendida y la situación sigue igual, se abrirá una nueva con el siguiente cambio de saldo.</p>
+{% endblock %}

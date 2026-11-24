@@ -1,18 +1,25 @@
+"""Casos de uso de productos: listar, validar, crear, editar y activar o desactivar.
+
+Los errores de validación se lanzan como ValueError (o OperacionRechazada) para mostrarlos con flash.
+"""
+
 from decimal import Decimal, InvalidOperation
 
 from pymysql import IntegrityError, MySQLError
 
 from Aplicaciones.Errores import OperacionRechazada, RegistroNoEncontrado
 from Entidades.Producto import Producto
-from Repositorios import CategoriasRepositorio, InventarioRepositorio, ProductosRepositorio
+from Repositorios import AlertasRepositorio, CategoriasRepositorio, InventarioRepositorio, ProductosRepositorio
 from Repositorios.BaseDatos import transaccion
 
 
 def listar():
+    """Devuelve todos los productos (lista de Producto con el nombre de su categoría)."""
     return ProductosRepositorio.listar()
 
 
 def obtener(id_producto):
+    """Devuelve el Producto con ese id. Lanza RegistroNoEncontrado si no existe."""
     producto = ProductosRepositorio.obtener(id_producto)
     if producto is None:
         raise RegistroNoEncontrado
@@ -20,7 +27,10 @@ def obtener(id_producto):
 
 
 def leer_decimal(formulario, campo):
-    """Lee un precio sin usar float, que puede introducir errores de redondeo."""
+    """Lee un precio sin usar float, que puede introducir errores de redondeo.
+
+    Devuelve el Decimal del campo indicado. Lanza ValueError si no es un número válido.
+    """
     try:
         valor = Decimal(formulario.get(campo, ""))
     except InvalidOperation as error:
@@ -36,7 +46,10 @@ def leer_decimal(formulario, campo):
 
 
 def leer_producto(formulario):
-    """Lee el formulario y valida los campos del DDL actual."""
+    """Lee el formulario y valida los campos del DDL actual.
+
+    Devuelve un Producto sin id. Lanza ValueError con el primer dato inválido.
+    """
     datos = {
         "codigo_barras": formulario.get("codigo_barras", "").strip(),
         "nombre": formulario.get("nombre", "").strip(),
@@ -73,10 +86,16 @@ def leer_producto(formulario):
 
 
 def crear(formulario):
+    """Crea el producto del formulario con inventario en cero en cada sucursal activa.
+
+    Lanza ValueError u OperacionRechazada (código repetido o categoría inactiva).
+    """
     producto = leer_producto(formulario)
     try:
         with transaccion() as cursor:
-            ProductosRepositorio.insertar(cursor, producto)
+            id_producto = ProductosRepositorio.insertar(cursor, producto)
+            # El inventario inicial queda en cero: se registra como agotado.
+            AlertasRepositorio.sincronizar(cursor, id_producto)
     except IntegrityError as error:
         raise OperacionRechazada("El código de barras ya existe o la categoría no es válida.") from error
     except MySQLError as error:
@@ -87,6 +106,8 @@ def crear(formulario):
 
 
 def editar(id_producto, formulario):
+    """Actualiza el producto con los datos del formulario. Lanza ValueError, RegistroNoEncontrado
+    u OperacionRechazada."""
     producto = leer_producto(formulario)
     try:
         with transaccion() as cursor:
@@ -103,6 +124,8 @@ def editar(id_producto, formulario):
 
 
 def cambiar_estado(id_producto):
+    """Activa o desactiva el producto y actualiza sus alertas. No se desactiva si tiene
+    existencias (OperacionRechazada)."""
     with transaccion() as cursor:
         producto = ProductosRepositorio.obtener_bloqueado(cursor, id_producto)
         if producto is None:
@@ -110,4 +133,5 @@ def cambiar_estado(id_producto):
         if producto.estado == 1 and InventarioRepositorio.tiene_existencias(cursor, id_producto):
             raise OperacionRechazada("No se puede desactivar un producto que todavía tiene existencias.")
         ProductosRepositorio.fijar_estado(cursor, id_producto, int(not producto.estado))
-
+        # Un producto inactivo no tiene alertas pendientes; al reactivarlo se vuelven a calcular.
+        AlertasRepositorio.sincronizar(cursor, id_producto)

@@ -9,11 +9,24 @@
 <body>
   <header>
     <h1>Inventario del supermercado</h1>
-    <nav aria-label="Navegación principal">
-      <a href="{{ url_for('listar_productos') }}">Productos</a>
-      <a href="{{ url_for('listar_categorias') }}">Categorías</a>
-      <a href="{{ url_for('ver_inventario') }}">Inventario</a>
-    </nav>
+    {% if g.usuario %}
+      <div class="barra">
+        <nav aria-label="Navegación principal">
+          <a href="{{ url_for('listar_productos') }}">Productos</a>
+          <a href="{{ url_for('listar_categorias') }}">Categorías</a>
+          <a href="{{ url_for('ver_inventario') }}">Inventario</a>
+          {% if puede('consultar_kardex') %}<a href="{{ url_for('ver_kardex') }}">Kardex</a>{% endif %}
+          {% if puede('consultar_alertas') %}<a href="{{ url_for('listar_alertas') }}">Alertas</a>{% endif %}
+          {% if puede('gestionar_compras') %}<a href="{{ url_for('listar_compras') }}">Compras</a>{% endif %}
+          {% if puede('gestionar_ventas') %}<a href="{{ url_for('listar_ventas') }}">Ventas</a>{% endif %}
+        </nav>
+        <form class="sesion" method="post" action="{{ url_for('cerrar_sesion') }}">
+          <span>{{ g.usuario.nombre }} {{ g.usuario.apellido }} · {{ g.usuario.rol }}</span>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit">Cerrar sesión</button>
+        </form>
+      </div>
+    {% endif %}
   </header>
   <main>
     {% with mensajes = get_flashed_messages(with_categories=true) %}

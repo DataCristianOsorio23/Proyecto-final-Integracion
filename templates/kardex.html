@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block titulo %}Kardex · Inventario{% endblock %}
+{% block contenido %}
+  <h2>Kardex</h2>
+  <p>Historial de entradas y salidas con los saldos anterior y nuevo de cada movimiento.</p>
+
+  <form method="get" class="filtros">
+    <div>
+      <label for="id_producto">Producto</label>
+      <select id="id_producto" name="id_producto">
+        <option value="">Todos</option>
+        {% for producto in productos %}
+          <option value="{{ producto.id_producto }}" {% if filtros.get('id_producto') == producto.id_producto|string %}selected{% endif %}>
+            {{ producto.nombre }}{% if not producto.estado %} (inactivo){% endif %}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="id_sucursal">Sucursal</label>
+      <select id="id_sucursal" name="id_sucursal">
+        <option value="">Todas</option>
+        {% for sucursal in sucursales %}
+          <option value="{{ sucursal.id_sucursal }}" {% if filtros.get('id_sucursal') == sucursal.id_sucursal|string %}selected{% endif %}>
+            {{ sucursal.nombre }}{% if not sucursal.estado %} (inactiva){% endif %}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="desde">Desde</label>
+      <input id="desde" name="desde" type="date" value="{{ filtros.get('desde', '') }}">
+    </div>
+    <div>
+      <label for="hasta">Hasta</label>
+      <input id="hasta" name="hasta" type="date" value="{{ filtros.get('hasta', '') }}">
+    </div>
+    <div class="botones">
+      <button class="boton" type="submit">Consultar</button>
+      <a href="{{ url_for('ver_kardex') }}">Limpiar</a>
+    </div>
+  </form>
+
+  <div class="tabla-contenedor">
+    <table>
+      <thead>
+        <tr><th>Fecha</th><th>Producto</th><th>Sucursal</th><th>Movimiento</th><th class="numero">Cantidad</th><th class="numero">Saldo anterior</th><th class="numero">Saldo nuevo</th><th>Usuario</th><th>Referencia</th><th>Observación</th></tr>
+      </thead>
+      <tbody>
+        {% for m in movimientos %}
+          <tr>
+            <td>{{ m.fecha_movimiento.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ m.producto }}</td>
+            <td>{{ m.sucursal }}</td>
+            <td>{{ m.movimiento }} ({{ m.tipo|lower }})</td>
+            <td class="numero">{{ '+' if m.tipo == 'ENTRADA' else '−' }}{{ m.cantidad }}</td>
+            <td class="numero">{{ m.stock_anterior }}</td>
+            <td class="numero">{{ m.stock_nuevo }}</td>
+            <td>{{ m.usuario }}</td>
+            <td>{{ m.referencia or '—' }}</td>
+            <td>{{ m.observacion or '—' }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="10">No hay movimientos para los filtros elegidos.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="ayuda">La fecha final se incluye completa.</p>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block titulo %}Compras · Inventario{% endblock %}
+{% block contenido %}
+  <div class="encabezado">
+    <div>
+      <h2>Compras</h2>
+      <p>Una compra registrada no cambia el inventario hasta que se recibe.</p>
+    </div>
+    <a class="boton" href="{{ url_for('crear_compra') }}">Nueva compra</a>
+  </div>
+  <div class="tabla-contenedor">
+    <table>
+      <thead><tr><th>Factura</th><th>Fecha</th><th>Proveedor</th><th>Sucursal</th><th class="numero">Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody>
+        {% for compra in compras %}
+          <tr>
+            <td>{{ compra.numero_factura }}</td>
+            <td>{{ compra.fecha_compra.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ compra.proveedor }}</td>
+            <td>{{ compra.sucursal }}</td>
+            <td class="numero">${{ '%.2f'|format(compra.total) }}</td>
+            <td><span class="estado {{ compra.estado|lower }}">{{ compra.estado|capitalize }}</span></td>
+            <td><a href="{{ url_for('ver_compra', id_compra=compra.id_compra) }}">Ver</a></td>
+          </tr>
+        {% else %}
+          <tr><td colspan="7">No hay compras registradas.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
